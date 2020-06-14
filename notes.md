@@ -9,7 +9,7 @@ Introduction
 Searching Text Files: Egrep
 ---------------------------
 
-El utility _egrep_ viene inclído en MacOS y otros!
+El utility _egrep_ viene incluído en MacOS y otros!
 El comando `egrep` toma el primer argumento "entrecomillado" como un regex, y los argumentos restantes como los archivo(s) en los cuales buscar.
 
     $ egrep 'regex' <file1> <file2>
@@ -154,3 +154,21 @@ Otro ejemplo para el cookbook
     "[^"]*"
 
 Encuentra cosas contenidas entre comillas
+
+Más ejemplos. Adios _egrep_
+===========================
+Otras implementaciones (como la de Perl, que es medio estándar) otras construcciones y tienen un conjunto más ámplio de metacaracteres. 
+
+| Metachar | Matches |
+|-------|-------------------|
+| `\t`  | Tab character     |
+| `\n`  | Newline           |
+| `\r`  | Carriage-return   |
+| `\s`  | Any whitespace    |
+| `\S`  | Anything not in `\s`|
+| `\w`  | Short for `[a-aA-Z0-9_]` _i.e_ word |
+| `\W`  | Negated `\w`      |
+| `\d`  | Short for `[0-9]` _i.e_ a digit |
+| `\D`  | Anythong not `\d` |
+
+Table: Nuevos metacaracteres
