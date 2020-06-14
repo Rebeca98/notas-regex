@@ -127,3 +127,30 @@ Table: Summary of quantifiers.
 Asi como hay cuantificadores para al menos uno, ilimitados, etc... hay una forma de especificar entre $n$ y $m$ coincidencias (_matches_).
 Eso se logra con la metasecuencia `{<n>,<m>}`.^[nótese que no hay espacio entre `<n>` y `<m>`]
 
+Parentheses and Backreferences
+------------------------------
+Más allá de su papel de "agrupadores", los paréntesis tienen más usos.
+En algunas implementaciones de regex los paréntesis "tienen memoria" de el texto con el cual coincide la expresión contenida en ellos.
+A estos a veces se les dice _capturing groups_.
+
+Para el cookbook:
+
+    \<([A-Za-z]+) +\1\>
+
+Busca palabras repetidas^[pero _egrep_ solo las ve si están en la misma línea.]
+
+A la metasecuencia `\1` se llama _backreference_ y como su nombre sugiere, hace referencia a el texto capturado.
+Si se tienen más paréntesis de captura las metasecuencias como `\2`, `\3`, etc... están disponibles.
+Los grupos de paréntesis se van numerando de izquierda a derecha.
+
+En algunas implementaciones, como RegExr, las backreferences se hacen con `$1, $2`, etc...
+^[El libro menciona que hay ciertas versiones de _egrep_ que tienen un bug con la opción `-i` y backreferences. Por eso no puede hacer ambos, y solo hace backreferencing. Es decir, puede encontrar "cat cat", pero no "The the". La versión instalada en mi computadora tiene ese problema.]
+
+Para incluír metacaracteres como literales en un patrón, se "escapan".
+Es decir, se preceden con un _backslash_ (`\`).
+
+Otro ejemplo para el cookbook
+
+    "[^"]*"
+
+Encuentra cosas contenidas entre comillas
