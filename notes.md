@@ -172,3 +172,78 @@ Otras implementaciones (como la de Perl, que es medio estándar) otras construcc
 | `\D`  | Anythong not `\d` |
 
 Table: Nuevos metacaracteres
+
+Modifying text with regex
+-------------------------
+En Perl, el comando
+
+    $var =~ m/regex/
+
+Busca coincidencias en el texto.
+Hay una manera de hacer más que eso, y además de buscar, reemplazar texto con con un patrón como este
+
+    $var =~ s/regex/replacement/
+
+Nótese como cambió el comando que se le da a Perl de `m`, que podemos leer como _match_, a `s`, que podemos leer como substitute.
+
+Como siempre, las diagonales `/` delimitan la expresión, y también el patrón de reemplazo.
+
+Nota: Mientras _egrep_ tiene _word boundaries_, los metacaracteres `\<` y `\>`, Perl y otras implementaciones inspiradas en Perl tienen el _catch-all_ `\b` que sirve como comodín entre `\<` y `\>` y coincide con tanto inicio como fin de palabra.
+
+Lookaround
+----------
+Los _lookarounds_ son como los conceptos de _line start_, _word-boundary_, etc... en el sentido de que no coinciden con texto sino con posiciones.
+De hecho, los _line start_ y constructos similares son casos particulares de _lookarounds_.
+Vemos dos tipos particulares: _lookahead_ y _lookbehind_.
+Ambos tiene versiones positivas y negativas
+
+El _lookahead_ se fija en el texto de adelante (hacia la derecha) para verificar si coincide con la subexpresión que contiene, y tiene éxito si dicho texto coincide con la subexpresión.
+Un _lookahead_ positivo se hace con la expresión `(?=)`.
+Decimos positivo para referirnos a que tendrá éxito si la subexpresión contenida entre `(?=` y el paréntesis de cierre `)` coincide con el texto al que se está mirando; en este caso a la derecha.
+
+El _lookbehind_ se fija en el texto "de atrás" es decir, el de la izquierda.
+El patrón para un _lookbehind_ positivo es el patrón `(?<=)` donde una vez más, `(?<=` actúa como paréntesis de apertura, y `)` como paréntesis de cierre.
+
+Algo muy importante de los _lookarounds_ es que no consumen texto.
+Es decir, si coinciden con algún string o una parte de el, el texto de coincidencia no forma parte de lo que se extrae al final.
+Justo como _caret_ o _dollar_, no coinciden con texto sino con posiciones.
+Por ejemplo, teniendo el string "200 pounds" la expresión `\d+` coincidiría con uno o más dígitos, en este caso coincidiría con todo el número "200".
+Ahora bien, con el mismo texto, la expresión `(?=\d+)` coincidiría con el _inicio_ del número "200".
+Ahora el _lookbehind_ de la expresión `(?<=\d+)` coincidiría con el _final_ del número "200".
+Trataremos de ilustrarlo mejor 
+
+     200 pounds
+    ^   ^
+    |   L Coincide con (?<=\d+)
+    L Coincide con (?=\d+)
+
+Claro que la magia del _lookbehing_ es cuando se combina con expresiones que si consumen texto.
+El hecho de que coinciden con posiciones dentro del texto y no consumen texto por si solos, las hace una herramienta como _caret_ o _dollar_, muy útiles y una buena adición al arsenal.
+
+Un ejemplo poderoso: 
+
+Supongamos por ejemplo que estamos haciendo cálculos y queremos obtener el número del resultado en un formato bonito; es decir, con comas para que sea más legible.
+La convención es usar comas cada tres dígitos contando de derecha a izquierda para marcar miles, cientos de miles, millones, etc...
+Para resolver el problema, encontramos la ubicaciones que _preceden_ a tres dígitos.
+Esto ya es facil de poner en términos de regex.
+El "preceder" a algo se resuelve fácil con un _lookahead_, en este caso, algo como `(?=\d)` que coincide con las ubicaciones que preceden a un solo dígito.
+Es como pedir tener al menos un dígito a la derecha.
+Podemos encontrar las que preceden a exactamente tres dígitos con `(?=\d\d\d)`.
+Si envolvemos a las tres `\d` dentro de un grupo podemos permitir que haya uno o más "juegos" de este grupo más adelante en la expresión, y finalizamos añadiendo _dollar_ al final para asegurarnos que no hay cosas adicionales.
+Al final tenemos la expresión `(\d\d\d)+?` por si sola coincide con los tres últimos dígitos de la línea, pero la expresión dentro de un _lookahead_, es decir, `(?=(\d\d\d)+$)` coincide con todas las **posiciones** en el texto que preceden a un grupo de tres dígitos.
+
+La expresión está casi lista, pero si se la aplicamos al número "123456" nos devolvería ",123,456".
+Eso ya está mucho más cerca de cómo escribimos números, pero tiene una coma extra al principio del número que no debería ir ahí.
+Para eso, pedimos que además de preceder a tres números, tenga por lo menos uno a la iquierda.
+Eso lo logramos añadiendo `(?<=\d)` que coincide con las posiciones que tienen un dígito a la izquierda.
+
+La expresión final en forma de comando de Perl (para el cookbook) queda como:
+
+    s/(?<=\d)(?=(\d\d\d)+$)/,/g
+
+O en una versión "más limpia": 
+
+    (?<=\d)(?=(?:\d\d\d)+$)
+
+En la que solo se usan los grupos de captura que son estrictamente necesarios.
+Vale la pena mencionar que la expesión anterior solo funciona con números que están en su propia línea (o por lo menos al final de una), pero no es difícil extender la expresión para poder manejar números incrustados en líneas.
